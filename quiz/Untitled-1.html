@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Bot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+        background-color: #f4f4f4;
+      }
+      .quiz-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: auto;
+      }
+      .explanation {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px;
+        display: none;
+      }
+      .timer {
+        color: blue;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      .score {
+        font-size: 18px;
+        margin-top: 20px;
+        font-weight: bold;
+      }
+      button {
+        padding: 10px;
+        margin-top: 10px;
+        cursor: pointer;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-container">
+      <h2 id="question">Loading question...</h2>
+      <div id="options"></div>
+      <p id="explanation" class="explanation"></p>
+      <p id="timer" class="timer">Time left: 5:00</p>
+      <p id="score" class="score">Score: 0</p>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+      const quiz = [
+        {
+          question:
+            "Which type of chemical bond involves the sharing of electron pairs between atoms?",
+          options: [
+            "Ionic bond",
+            "Covalent bond",
+            "Metallic bond",
+            "Hydrogen bond",
+          ],
+          answer: "Covalent bond",
+          explanation:
+            "Covalent bonds form when two atoms share electrons to achieve a stable electron configuration.",
+        },
+        {
+          question: "Which of the following compounds contains an ionic bond?",
+          options: ["CO₂", "H₂O", "NaCl", "NH₃"],
+          answer: "NaCl",
+          explanation:
+            "NaCl is formed by the transfer of electrons from Na (metal) to Cl (nonmetal), creating an ionic bond.",
+        },
+        {
+          question:
+            "What is the shape of a methane (CH₄) molecule according to the VSEPR theory?",
+          options: ["Linear", "Trigonal planar", "Tetrahedral", "Bent"],
+          answer: "Tetrahedral",
+          explanation:
+            "CH₄ has four bonding pairs around the central carbon, resulting in a tetrahedral geometry.",
+        },
+        {
+          question:
+            "Which of the following elements has the highest electronegativity?",
+          options: ["Sodium", "Oxygen", "Carbon", "Fluorine"],
+          answer: "Fluorine",
+          explanation:
+            "Fluorine has the highest electronegativity (3.98 on the Pauling scale) because it has a strong attraction for electrons.",
+        },
+        {
+          question: "Which of the following molecules is nonpolar?",
+          options: ["NH₃", "H₂O", "CO₂", "HF"],
+          answer: "CO₂",
+          explanation:
+            "CO₂ has a linear shape with symmetrical charge distribution, making it nonpolar.",
+        },
+        {
+          question: "What type of bond is present in O₂?",
+          options: ["Single bond", "Double bond", "Triple bond", "Ionic bond"],
+          answer: "Double bond",
+          explanation:
+            "O₂ molecules share two pairs of electrons, forming a double bond.",
+        },
+        {
+          question: "Which bond is the strongest?",
+          options: [
+            "Single bond",
+            "Double bond",
+            "Triple bond",
+            "Hydrogen bond",
+          ],
+          answer: "Triple bond",
+          explanation:
+            "A triple bond has three shared pairs of electrons, making it the strongest and shortest.",
+        },
+        {
+          question:
+            "What is the hybridization of the carbon atoms in ethene (C₂H₄)?",
+          options: ["sp", "sp²", "sp³", "None of the above"],
+          answer: "sp²",
+          explanation:
+            "In ethene, carbon undergoes sp² hybridization, forming a double bond.",
+        },
+        {
+          question: "Which of the following has a metallic bond?",
+          options: ["NaCl", "CO₂", "Fe", "H₂O"],
+          answer: "Fe",
+          explanation:
+            "Metallic bonding occurs in metals like Fe, where electrons move freely in a 'sea of electrons.'",
+        },
+        {
+          question: "Which molecule exhibits hydrogen bonding?",
+          options: ["CH₄", "NH₃", "CO₂", "NaCl"],
+          answer: "NH₃",
+          explanation:
+            "NH₃ has hydrogen bonding because nitrogen is highly electronegative and attracts hydrogen atoms.",
+        },
+      ];
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let timeLeft = 300;
+      let timer;
+
+      function startTimer() {
+        timer = setInterval(() => {
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            document.getElementById("explanation").innerText =
+              "Time's up! The correct answer was: " +
+              quiz[currentQuestionIndex].answer;
+            document.getElementById("explanation").style.display = "block";
+          } else {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            document.getElementById(
+              "timer"
+            ).innerText = `Time left: ${minutes}:${
+              seconds < 10 ? "0" : ""
+            }${seconds}`;
+            timeLeft--;
+          }
+        }, 1000);
+      }
+
+      function loadQuestion() {
+        clearInterval(timer);
+        timeLeft = 300;
+        startTimer();
+        const q = quiz[currentQuestionIndex];
+        document.getElementById("question").innerText = q.question;
+        document.getElementById("options").innerHTML = q.options
+          .map(
+            (option) => `
+                <button onclick="checkAnswer('${option}')">${option}</button>
+            `
+          )
+          .join(" ");
+        document.getElementById("explanation").style.display = "none";
+      }
+
+      function checkAnswer(selected) {
+        const q = quiz[currentQuestionIndex];
+        clearInterval(timer);
+        if (selected === q.answer) {
+          score++;
+          document.getElementById("score").innerText = "Score: " + score;
+          nextQuestion();
+        } else {
+          document.getElementById("explanation").innerText =
+            "Incorrect! " + q.explanation;
+          document.getElementById("explanation").style.display = "block";
+        }
+      }
+
+      function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quiz.length) {
+          loadQuestion();
+        } else {
+          document.querySelector(
+            ".quiz-container"
+          ).innerHTML = `<h2>Quiz Completed!</h2><p>Your final score is: ${score} / ${quiz.length}</p>`;
+        }
+      }
+
+      loadQuestion();
+    </script>
+  </body>
+</html>
